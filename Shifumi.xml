@@ -1,0 +1,277 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+ ..\..\FrameXML\UI.xsd">
+	<Frame name="ShifumiPlayFrame" frameStrata="TOOLTIP" parent="UIParent" alpha="0" hidden="true">
+		<Animations>
+            <AnimationGroup parentKey="FadeIn">
+				<Alpha target="ShifumiPlayFrame" order="1" change="1.0" duration="0.2" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFrame:SetAlpha(1)
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="FadeOut">
+				<Alpha target="ShifumiPlayFrame" order="1" change="-1.0" startDelay="1" duration="0.5" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFrame:SetAlpha(0)
+						ShifumiPlayFrame:Hide()
+						if GetShifumiState() == SHIFUMI_STATE_RESULTS then
+							ShifumiResultsFrame:Show()
+						end
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="FadeOutNoDelay">
+				<Alpha target="ShifumiPlayFrame" order="1" change="-1.0" duration="0.5" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFrame:SetAlpha(0)
+						ShifumiPlayFrame:Hide()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="SelectRock">
+				<Alpha target="ShifumiPlayFramePaper" order="1" change="-1.0" duration="0.2" />
+				<Alpha target="ShifumiPlayFrameScissors" order="1" change="-1.0" duration="0.2" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFramePaper:Hide()
+						ShifumiPlayFrameScissors:Hide()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="SelectPaper">
+				<Alpha target="ShifumiPlayFrameRock" order="1" change="-1.0" duration="0.2" />
+				<Alpha target="ShifumiPlayFrameScissors" order="1" change="-1.0" duration="0.2" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFrameRock:Hide()
+						ShifumiPlayFrameScissors:Hide()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="SelectScissors">
+				<Alpha target="ShifumiPlayFramePaper" order="1" change="-1.0" duration="0.2" />
+				<Alpha target="ShifumiPlayFrameRock" order="1" change="-1.0" duration="0.2" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiPlayFrameRock:Hide()
+						ShifumiPlayFramePaper:Hide()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+        </Animations>
+        <Size>
+            <AbsDimension x="256" y="78"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" x="0" y="-70"/>
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture file="Interface\Cooldown\LoC-ShadowBG">
+                    <Anchors>
+                        <Anchor point="BOTTOM" x="0" y="0"/>
+                    </Anchors>
+                    <Size x="256" y="78"/>
+                    <Color r="1.0" g="1.0" b="1.0" a="0.6"/>
+                </Texture>
+            </Layer>
+            <Layer>
+                <FontString inherits="GameFontNormalHuge" parentKey="TitleText">
+                    <Size x="0" y="20"/>
+                    <Anchors>
+                        <Anchor point="CENTER" y="55" />
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+			<Button parentKey="Rock" name="ShifumiPlayFrameRock">
+				<Size>
+					<AbsDimension x="56" y="56"/>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER" x="-70" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<Texture parentKey="Icon">
+							<Size x="56" y="56"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						ShifumiSelectMove(SHIFUMI_ROCK)
+					</OnClick>
+				</Scripts>
+			</Button>
+            <Button parentKey="Paper" name="ShifumiPlayFramePaper">
+				<Size>
+					<AbsDimension x="56" y="56"/>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<Texture parentKey="Icon">
+							<Size x="56" y="56"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						ShifumiSelectMove(SHIFUMI_PAPER)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button parentKey="Scissors" name="ShifumiPlayFrameScissors">
+				<Size>
+					<AbsDimension x="56" y="56"/>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER" x="70" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<Texture parentKey="Icon">
+							<Size x="56" y="56"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						ShifumiSelectMove(SHIFUMI_SCISSORS)
+					</OnClick>
+				</Scripts>
+			</Button>
+        </Frames>
+		<Scripts>
+			<OnShow>
+				self.FadeOut:Stop()
+				ShifumiPlayFrameRock:Show()
+				ShifumiPlayFramePaper:Show()
+				ShifumiPlayFrameScissors:Show()
+				self.FadeIn:Play()
+				PlaySoundFile("Sound\\INTERFACE\\UI_Pet_BattleStart_01.OGG")
+			</OnShow>
+		</Scripts>
+    </Frame>
+	
+	<Frame name="ShifumiResultsFrame" frameStrata="TOOLTIP" alpha="0" parent="UIParent" hidden="true">
+        <Size>
+            <AbsDimension x="400" y="400"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" x="0" y="0"/>
+        </Anchors>
+		<Animations>
+            <AnimationGroup parentKey="FadeIn">
+				<Alpha target="ShifumiResultsFrame" order="1" change="1.0" startDelay="1" endDelay="2" duration="0.5" />
+				<Scripts>
+					<OnPlay>
+						PlaySoundFile("Sound\\INTERFACE\\PVPWARNING.OGG")
+					</OnPlay>
+                    <OnFinished>
+						ShifumiResultsFrame:SetAlpha(1)
+						ShifumiResultsFrame.FadeInTwo:Play()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="FadeInTwo">
+				<Alpha target="ShifumiResultsOpponentMove" order="2" change="1.0" duration="1" />
+                <Alpha target="ShifumiResultsOpponentName" order="2" change="1.0" duration="1" />
+				<Alpha target="ShifumiResultsText1" order="3" change="1.0" duration="1" />
+				<Alpha target="ShifumiResultsText2" order="3" change="1.0" duration="1" />
+				<Scripts>
+					<OnPlay>
+						DoShifumiEmote()
+						if GetShifumiResult() == 1 then
+							PlaySoundFile("Sound\\INTERFACE\\UI_PetBattle_Victory01.OGG")
+						else
+							PlaySoundFile("Sound\\INTERFACE\\UI_PetBattle_Defeat01.OGG")
+						end
+					</OnPlay>
+                    <OnFinished>
+						if GetShifumiResult() == 1 then
+							DoShifumiEmote2()
+						end
+						ShifumiResultsFrame.OpponentMove:SetAlpha(1)
+						ShifumiResultsFrame.OpponentName:SetAlpha(1)
+						ShifumiResultsFrame.Text1:SetAlpha(1)
+						ShifumiResultsFrame.Text2:SetAlpha(1)
+						ShifumiResultsFrame.FadeOut:Play()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+			<AnimationGroup parentKey="FadeOut">
+				<Alpha target="ShifumiResultsFrame" order="1" change="-1.0" startDelay="3" duration="0.5" />
+				<Scripts>
+                    <OnFinished>
+						ShifumiResultsFrame:SetAlpha(0)
+						ShifumiResultsFrame.OpponentMove:SetAlpha(0)
+						ShifumiResultsFrame.OpponentName:SetAlpha(0)
+						ShifumiResultsFrame.Text1:SetAlpha(0)
+						ShifumiResultsFrame.Text2:SetAlpha(0)
+						ShifumiResultsFrame:Hide()
+						ResetShifumi()
+					</OnFinished>
+                </Scripts>
+            </AnimationGroup>
+        </Animations>
+        <Layers>
+            <Layer>
+				<FontString inherits="GameFontNormalHuge" parentKey="SelfName" text="You">
+                    <Size x="0" y="20"/>
+                    <Anchors>
+                        <Anchor point="CENTER" x="-100" y="50" />
+                    </Anchors>
+                </FontString>
+				
+				<Texture parentKey="SelfMove" file="Interface\ICONS\Ability_Warrior_SecondWind">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="CENTER" x="-100" y="0"/>
+					</Anchors>
+				</Texture>
+				
+                <FontString inherits="GameFontNormalHuge" name="ShifumiResultsOpponentName" alpha="0" parentKey="OpponentName" text="Coconutsdown">
+                    <Size x="0" y="20"/>
+                    <Anchors>
+                        <Anchor point="CENTER" x="100" y="50" />
+                    </Anchors>
+                </FontString>
+				
+				<Texture name="ShifumiResultsOpponentMove" parentKey="OpponentMove" alpha="0" file="Interface\ICONS\Ability_Hunter_BeastSoothe">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="CENTER" x="100" y="0"/>
+					</Anchors>
+				</Texture>
+				
+                <FontString inherits="GameFontNormalHuge" name="ShifumiResultsText1" parentKey="Text1" alpha="0">
+                    <Size x="0" y="20"/>
+                    <Anchors>
+                        <Anchor point="CENTER" x="0" y="-80" />
+                    </Anchors>
+                </FontString>
+				<FontString inherits="GameFontNormalHuge" name="ShifumiResultsText2" parentKey="Text2" alpha="0">
+                    <Size x="0" y="20"/>
+                    <Anchors>
+                        <Anchor point="CENTER" x="0" y="-100" />
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+		<Scripts>
+			<OnShow>
+				self.FadeIn:Play()
+			</OnShow>
+		</Scripts>
+    </Frame>
+</Ui>

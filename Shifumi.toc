@@ -1,0 +1,6 @@
+## Interface: 50100
+## Title: Shifumi
+## Notes: Rock-paper-scissors
+
+Shifumi.xml
+Shifumi.lua
