@@ -190,7 +190,6 @@
 				<Alpha target="ShifumiResultsText2" order="3" change="1.0" duration="1" />
 				<Scripts>
 					<OnPlay>
-						DoShifumiEmote()
 						if GetShifumiResult() == 1 then
 							PlaySoundFile("Sound\\INTERFACE\\UI_PetBattle_Victory01.OGG")
 						else
@@ -199,7 +198,7 @@
 					</OnPlay>
                     <OnFinished>
 						if GetShifumiResult() == 1 then
-							DoShifumiEmote2()
+							DoShifumiEmote()
 						end
 						ShifumiResultsFrame.OpponentMove:SetAlpha(1)
 						ShifumiResultsFrame.OpponentName:SetAlpha(1)

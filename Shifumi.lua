@@ -27,8 +27,6 @@ SHIFUMI_STATE_RESULTS = 5
 
 local SHIFUMI_PROTOCOL_VERSION = 1
 
-local SHIFUMI_DUEL_RANGE = UnitPopupButtons["DUEL"].dist
-
 --[[ Strings ]]--
 
 local SHIFUMI_DUEL_REQUESTED = "%s has challenged you to a Shifumi duel."
@@ -51,11 +49,10 @@ local SHIFUMI_ERROR_UNAVAILABLE = "%s is not available for a Shifumi duel."
 local SHIFUMI_ERROR_CANCEL = "Shifumi duel cancelled."
 local SHIFUMI_ERROR_NOADDON = "%s doesn't seem to have Shifumi installed."
 local SHIFUMI_ERROR_STATE = "You cannot start a Shifumi duel now."
-local SHIFUMI_ERROR_RANGE = "%s is out of range for a Shifumi duel."
 
 --[[ Local vars ]]--
 
-local unitCanShifumi = {}
+local hasShifumi = {}
 local checkThrottle = {}
 local checkCurrent = nil
 
@@ -119,20 +116,26 @@ function UnitIsShifumiValid(unit)
 	return UnitIsPlayer(unit) and UnitCanCooperate("player", unit) and UnitIsSameServer("player", unit)
 end
 
+function UnitHasShifumi(unit)
+	return hasShifumi[UnitName(unit)]
+end
+
+function PlayerShifumiAvailable()
+	return gameState == SHIFUMI_STATE_DEFAULT and not UnitAffectingCombat("player")
+end
+
 function UnitCanShifumi(unit)
-	return unitCanShifumi[UnitName(unit)] and gameState == SHIFUMI_STATE_DEFAULT and CheckInteractDistance(unit, SHIFUMI_DUEL_RANGE)
+	return UnitHasShifumi(unit) and PlayerShifumiAvailable()
 end
 
 function DisplayShifumiError(unit)
 	local err
 	local name = UnitName(unit)
 	
-	if not unitCanShifumi[name] then
+	if not hasShifumi[name] then
 		err = SHIFUMI_ERROR_NOADDON:format(name)
-	elseif gameState ~= SHIFUMI_STATE_DEFAULT then
+	elseif not PlayerShifumiAvailable() then
 		err = SHIFUMI_ERROR_STATE
-	elseif not CheckInteractDistance(unit, SHIFUMI_DUEL_RANGE) then
-		err = SHIFUMI_ERROR_RANGE:format(name)
 	else
 		return
 	end
@@ -248,13 +251,7 @@ function DisplayShifumiResults()
 end
 
 function DoShifumiEmote()
-	do return end -- spam...
-	DoEmote("point", opponentName)
-	SendChatMessage("chose the Rock!", "EMOTE")
-end
-
-function DoShifumiEmote2()
-	if gameState ~= SHIFUMI_STATE_RESULTS then return end
+	if gameState ~= SHIFUMI_STATE_RESULTS or not UnitIsVisible(opponentName) then return end
 	SendChatMessage(SHIFUMI_WIN_EMOTE:format(opponentName), "EMOTE")
 end
 
@@ -287,7 +284,7 @@ StaticPopupDialogs["SHIFUMI_DUEL_REQUESTED"] = {
 
 --[[ Unit menu button ]]--
 
-UnitPopupButtons["SHIFUMI_DUEL"] = { text = SHIFUMI_DUEL, dist = SHIFUMI_DUEL_RANGE }
+UnitPopupButtons["SHIFUMI_DUEL"] = { text = SHIFUMI_DUEL, dist = 0 }
 
 for menu, items in pairs(UnitPopupMenus) do
 	for i = 0, #items do
@@ -317,24 +314,22 @@ hooksecurefunc("UnitPopup_OnUpdate", function(elapsed)
         return
     end
 	
-	for index, value in ipairs(UnitPopupFrames) do
-        if UIDROPDOWNMENU_OPEN_MENU == _G[value] then
-            break
-        elseif index == #UnitPopupFrames then
-            return
-        end
-    end
-	
 	local currentDropDown = UIDROPDOWNMENU_OPEN_MENU;
-	local unit, unitName = currentDropDown.unit, UnitName(currentDropDown.unit)
+	local unit = currentDropDown.unit
+
+	if not unit then
+		return
+	end
 	
-	if not UnitCanShifumi(unit) and UnitIsShifumiValid(unit) then
+	local unitName = currentDropDown.unit, UnitName(currentDropDown.unit)
+	
+	if not UnitHasShifumi(unit) and UnitIsShifumiValid(unit) then
 		if not checkThrottle[unitName] or checkCurrent ~= unitName then
 			checkThrottle[unitName] = -1
 		end
 		checkCurrent = unitName
 		if checkThrottle[unitName] < 0 then
-			UnitCheckCanShifumi(unit)
+			SendShifumiMessage("CHECK_CAN_SHIFUMI;" .. SHIFUMI_PROTOCOL_VERSION, UnitName(unit))
 			checkThrottle[unitName] = 10
 		else
 			checkThrottle[unitName] = checkThrottle[unitName] - elapsed
@@ -395,7 +390,7 @@ local function AddonMsgListener(self, _, prefix, msg, channel, sender)
 			SendShifumiMessage("VERSION_MISMATCH", sender)
 		end
 	elseif action == "START_DUEL" then
-		if gameState == SHIFUMI_STATE_DEFAULT then
+		if PlayerShifumiAvailable() then
 			gameState = SHIFUMI_STATE_REQUEST
 			opponentName = sender
 			StaticPopup_Show("SHIFUMI_DUEL_REQUESTED", sender)
@@ -438,7 +433,7 @@ local function AddonMsgListener(self, _, prefix, msg, channel, sender)
 			opponentName = nil
 		end
 	elseif action == "CAN_SHIFUMI" then
-		unitCanShifumi[sender] = true
+		hasShifumi[sender] = true
 	elseif action == "CANCEL_DUEL" then
 		if sender == opponentName then
 			CancelShifumiDuel()
