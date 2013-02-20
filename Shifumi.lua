@@ -398,15 +398,13 @@ local function AddonMsgListener(self, _, prefix, msg, channel, sender)
 			SendShifumiMessage("UNAVAILABLE", sender)
 		end
 	elseif action == "ACCEPT_DUEL" then
-		if gameState == SHIFUMI_STATE_DEFAULT then
-			if sender == opponentName then
-				gameState = SHIFUMI_STATE_SELECT
-				ShifumiPlayFrame:Show()
-				SendShifumiMessage("SYNC_DUEL", opponentName)
-				InitShifumiTimeout(10)
-			else
-				SendShifumiMessage("INVALID_DUEL", sender)
-			end
+		if sender == opponentName and gameState == SHIFUMI_STATE_DEFAULT then
+			gameState = SHIFUMI_STATE_SELECT
+			ShifumiPlayFrame:Show()
+			SendShifumiMessage("SYNC_DUEL", opponentName)
+			InitShifumiTimeout(10)
+		else
+			SendShifumiMessage("INVALID_DUEL", sender)
 		end
 	elseif action == "SYNC_DUEL" then
 		if sender == opponentName and gameState == SHIFUMI_STATE_SYNCING then
